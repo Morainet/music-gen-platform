@@ -22,6 +22,10 @@ outputs/
 *.pt
 *.npy
 
+# Node / Frontend
+node_modules/
+frontend/dist/
+
 # IDE / OS
 .idea/
 .vscode/
