@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* 浅色主题（默认 :root）。颜色为 RGB 通道，供 Tailwind alpha 修饰使用 */
+  :root {
+    color-scheme: light;
+    --c-base: 250 250 252;
+    --c-surface: 255 255 255;
+    --c-elevated: 244 244 247;
+    --c-border: 228 228 235;
+    --c-border-subtle: 238 238 243;
+    --c-text-primary: 22 22 29;
+    --c-text-secondary: 90 90 110;
+    --c-text-muted: 140 140 158;
+    --c-violet: 139 92 246;
+    --c-cyan: 34 211 238;
+    --c-success: 16 185 129;
+    --c-warning: 217 119 6;
+    --c-error: 220 38 38;
+    --c-info: 37 99 235;
+  }
+
+  /* 深色主题 */
+  .dark {
+    color-scheme: dark;
+    --c-base: 10 10 15;
+    --c-surface: 22 22 29;
+    --c-elevated: 31 31 42;
+    --c-border: 42 42 54;
+    --c-border-subtle: 32 32 42;
+    --c-text-primary: 237 237 242;
+    --c-text-secondary: 161 161 181;
+    --c-text-muted: 107 107 128;
+    --c-violet: 139 92 246;
+    --c-cyan: 34 211 238;
+    --c-success: 52 211 153;
+    --c-warning: 251 191 36;
+    --c-error: 248 113 113;
+    --c-info: 96 165 250;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-base text-text-primary font-sans antialiased;
+  }
+
+  /* 自定义滚动条 */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-elevated rounded-full;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-accent-gradient bg-clip-text text-transparent;
+  }
+}

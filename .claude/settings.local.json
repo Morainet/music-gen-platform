@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(zip -r -X ../music-gen-platform-src.zip . -x */node_modules/* -x */__pycache__/* -x *.pyc -x */dist/* -x */build/* -x */target/* -x *.tsbuildinfo -x *.class -x */.venv/* */venv/* -x *.egg-info/* -x *.env */.env *.env.local -x *.DS_Store -x */.idea/* */.vscode/* -x *.wav *.ckpt *.pt *.npy -x */data/* */outputs/*)"
+    ]
+  }
+}

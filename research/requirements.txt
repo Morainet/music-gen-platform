@@ -1,0 +1,12 @@
+# 算法研究依赖（轨道 B）。torch/torchaudio 按 CUDA 版本另装，见 docs/04
+torch
+torchaudio
+numpy
+matplotlib
+soundfile
+librosa
+# 第 4 层文本条件：T5 文本编码器
+transformers
+sentencepiece
+# 第 5 层评估：FAD 需要 scipy.linalg.sqrtm；CLAP 在 transformers 内
+scipy
