@@ -19,6 +19,7 @@ from audio_codec.encode_decode import load_model as load_codec
 from audio_lm.conditional import ConditionalAudioLM
 from audio_lm.delay import revert_delay_pattern
 from audio_lm.text_encoder import T5TextEncoder
+from device_util import add_device_arg, describe_device, resolve_device, setup_training_env
 
 
 def load_lm(path: str, device: str):
@@ -70,6 +71,7 @@ def generate(model, text_enc, prompt, frames, cfg, temperature, top_k, device):
 
 def main():
     p = argparse.ArgumentParser()
+    add_device_arg(p)
     p.add_argument("--lm", required=True)
     p.add_argument("--codec", required=True)
     p.add_argument("--prompt", required=True)
@@ -80,16 +82,18 @@ def main():
     p.add_argument("--out", default="audio_lm/generated_text.wav")
     args = p.parse_args()
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model, t5_name = load_lm(args.lm, device)
-    text_enc = T5TextEncoder(t5_name, device=device)
-    codec, cfg = load_codec(args.codec, device)
+    device = resolve_device(args.device)
+    setup_training_env(device)
+    print(f"device: {describe_device(device)}")
+    model, t5_name = load_lm(args.lm, str(device))
+    text_enc = T5TextEncoder(t5_name, device=str(device))
+    codec, cfg = load_codec(args.codec, str(device))
     sr = cfg["sr"]
 
     print(f'prompt: "{args.prompt}" | cfg={args.cfg}')
     codes = generate(
         model, text_enc, args.prompt, args.frames, args.cfg,
-        args.temperature, args.top_k, device,
+        args.temperature, args.top_k, str(device),
     )
     wav = codec.decode(codes)
     torchaudio.save(args.out, wav[0].cpu().clamp(-1, 1), sr)
