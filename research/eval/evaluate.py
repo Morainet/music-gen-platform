@@ -20,6 +20,7 @@ import torchaudio
 
 from eval.clap import Clap
 from eval.fad import frechet_distance
+from device_util import add_device_arg, describe_device, resolve_device, setup_training_env
 
 AUDIO_EXTS = (".wav", ".flac", ".mp3", ".ogg")
 
@@ -45,14 +46,17 @@ def load_wavs(folder: str):
 
 def main():
     p = argparse.ArgumentParser()
+    add_device_arg(p)
     p.add_argument("--gen", required=True, help="生成音频目录")
     p.add_argument("--ref", help="参考音频目录（算 FAD 用）")
     p.add_argument("--prompts", help="JSONL：audio_path + caption（算 CLAP score 用）")
     p.add_argument("--clap", default="laion/clap-htsat-unfused")
     args = p.parse_args()
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    clap = Clap(args.clap, device=device)
+    device = resolve_device(args.device)
+    setup_training_env(device)
+    print(f"device: {describe_device(device)}")
+    clap = Clap(args.clap, device=str(device))
 
     gen_wavs, sr = load_wavs(args.gen)
     print(f"生成音频: {len(gen_wavs)} 条")
