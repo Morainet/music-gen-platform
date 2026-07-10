@@ -16,18 +16,22 @@ import torch
 import torchaudio
 
 from audio_codec.encode_decode import load_model
+from device_util import add_device_arg, describe_device, resolve_device, setup_training_env
 
 
 def main():
     p = argparse.ArgumentParser()
+    add_device_arg(p)
     p.add_argument("--codec", required=True)
     p.add_argument("--manifest", required=True, help="JSONL：audio_path + caption")
     p.add_argument("--root", default="", help="audio_path 的相对根目录")
     p.add_argument("--out", default="audio_lm/tokens_text.pt")
     args = p.parse_args()
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model, cfg = load_model(args.codec, device)
+    device = resolve_device(args.device)
+    setup_training_env(device)
+    print(f"device: {describe_device(device)}")
+    model, cfg = load_model(args.codec, str(device))
     sr, hop = cfg["sr"], 2 ** cfg["n_down"]
 
     rows = []
