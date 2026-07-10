@@ -8,6 +8,11 @@ CREATE TABLE IF NOT EXISTS users (
     created_at    TIMESTAMPTZ DEFAULT now()
 );
 
+-- 默认用户桶：未登录任务归到 id=0（对应 CurrentUser.DEFAULT_USER）
+INSERT INTO users (id, username, password_hash)
+VALUES (0, 'default', 'x')
+ON CONFLICT (id) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS generation_tasks (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id     BIGINT REFERENCES users(id),
