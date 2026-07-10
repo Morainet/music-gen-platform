@@ -14,7 +14,10 @@ export function useModels() {
         // 后端不可用时给个兜底，便于本地先看 UI
         if (active)
           setModels([
-            { name: "musicgen-medium", displayName: "MusicGen Medium" },
+            {
+              name: "mgp-custom",
+              displayName: "自研模型 (VQ-VAE + AR Transformer)",
+            },
           ]);
       })
       .finally(() => active && setLoading(false));
