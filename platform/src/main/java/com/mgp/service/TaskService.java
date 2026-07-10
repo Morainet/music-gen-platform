@@ -1,7 +1,5 @@
 package com.mgp.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mgp.domain.GenerationTask;
 import com.mgp.domain.TaskStatus;
 import com.mgp.dto.CreateTaskRequest;
@@ -29,7 +27,6 @@ public class TaskService {
     private final ModelRepository modelRepo;
     private final TaskProducer producer;
     private final StringRedisTemplate redis;
-    private final ObjectMapper mapper = new ObjectMapper();
 
     public TaskService(
             TaskRepository repo,
@@ -57,7 +54,7 @@ public class TaskService {
         task.setUserId(CurrentUser.id());
         task.setPrompt(req.prompt());
         task.setModelName(model);
-        task.setParams(toJson(params));
+        task.setParams(params);
         task.setStatus(TaskStatus.PENDING);
         task = repo.save(task);
 
@@ -116,14 +113,6 @@ public class TaskService {
             if (d < 1 || d > MAX_DURATION) {
                 throw new IllegalArgumentException("duration 需在 1-" + MAX_DURATION + " 秒");
             }
-        }
-    }
-
-    private String toJson(Map<String, Object> m) {
-        try {
-            return mapper.writeValueAsString(m);
-        } catch (JsonProcessingException e) {
-            return "{}";
         }
     }
 }
