@@ -12,6 +12,7 @@ import torch
 import torchaudio
 
 from audio_codec.model import VQVAE
+from device_util import add_device_arg, describe_device, resolve_device, setup_training_env
 
 
 def load_model(ckpt_path: str, device: str) -> VQVAE:
@@ -30,13 +31,16 @@ def load_model(ckpt_path: str, device: str) -> VQVAE:
 
 def main():
     p = argparse.ArgumentParser()
+    add_device_arg(p)
     p.add_argument("--ckpt", required=True)
     p.add_argument("--audio", required=True)
     p.add_argument("--out", default="audio_codec/recon.wav")
     args = p.parse_args()
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model, cfg = load_model(args.ckpt, device)
+    device = resolve_device(args.device)
+    setup_training_env(device)
+    print(f"device: {describe_device(device)}")
+    model, cfg = load_model(args.ckpt, str(device))
     sr = cfg["sr"]
 
     wav, in_sr = torchaudio.load(args.audio)
