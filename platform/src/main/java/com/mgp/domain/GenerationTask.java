@@ -2,9 +2,12 @@ package com.mgp.domain;
 
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
+import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "generation_tasks")
@@ -25,9 +28,10 @@ public class GenerationTask {
     @Column(name = "model_name", nullable = false)
     private String modelName;
 
-    // JSON 字符串存储生成参数（duration/temperature/...）
+    // 生成参数（duration/temperature/...），映射到 jsonb 列
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, columnDefinition = "jsonb")
-    private String params;
+    private Map<String, Object> params;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
