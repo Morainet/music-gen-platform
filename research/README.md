@@ -7,8 +7,46 @@
 ```bash
 cd research
 python -m venv .venv && source .venv/bin/activate
-# 先按 docs/04 装匹配 CUDA 的 torch/torchaudio
+# NVIDIA：按 docs/04 装匹配 CUDA 的 torch/torchaudio
+# Apple Silicon：pip install torch torchaudio（官方 wheel 已含 MPS）
 pip install -r requirements.txt
+```
+
+### 计算设备
+
+所有训练/生成/评估脚本支持 `--device`：
+
+| 值 | 说明 |
+|----|------|
+| `auto` | 默认，优先级 cuda → mps → cpu |
+| `cuda` | NVIDIA GPU |
+| `mps` | Apple Silicon GPU |
+| `cpu` | 纯 CPU（调试用，训练很慢） |
+
+查看当前可用设备：
+
+```bash
+python -m device_util
+```
+
+示例（Mac 上用 MPS 训练 codec）：
+
+```bash
+python -m audio_codec.train --data path/to/audio --epochs 50 --device mps
+```
+
+### 训练加速与健壮性
+
+三个训练脚本（`audio_codec.train` / `audio_lm.train` / `audio_lm.train_text`）共享以下能力：
+
+- **混合精度**：CUDA 上自动启用 float16 autocast + GradScaler；MPS/CPU 自动跳过（透明直通）。如遇数值问题加 `--no-amp` 关闭。
+- **续训**：`--resume` 从 `outdir` 下的 checkpoint 恢复模型、优化器与 epoch。
+- **中断保存**：Ctrl-C 会先保存当前 epoch 的 checkpoint 再退出。
+- **吞吐**：每个 epoch 打印 `it/s`；CUDA 自动开启 TF32 与 cudnn.benchmark，DataLoader 在 CUDA 上启用 pin_memory，多 worker 时复用进程。
+
+```bash
+# 续训示例
+python -m audio_lm.train --tokens audio_lm/tokens.pt --epochs 200 --resume
 ```
 
 ## 进度
