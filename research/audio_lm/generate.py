@@ -17,6 +17,7 @@ import torchaudio
 from audio_codec.encode_decode import load_model as load_codec
 from audio_lm.delay import revert_delay_pattern
 from audio_lm.transformer import AudioLM
+from device_util import add_device_arg, describe_device, resolve_device, setup_training_env
 
 
 def load_lm(path: str, device: str) -> AudioLM:
@@ -68,6 +69,7 @@ def generate_tokens(model: AudioLM, frames: int, device: str,
 
 def main():
     p = argparse.ArgumentParser()
+    add_device_arg(p)
     p.add_argument("--lm", required=True)
     p.add_argument("--codec", required=True)
     p.add_argument("--frames", type=int, default=300)
@@ -76,13 +78,15 @@ def main():
     p.add_argument("--out", default="audio_lm/generated.wav")
     args = p.parse_args()
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    lm = load_lm(args.lm, device)
-    codec, cfg = load_codec(args.codec, device)
+    device = resolve_device(args.device)
+    setup_training_env(device)
+    print(f"device: {describe_device(device)}")
+    lm = load_lm(args.lm, str(device))
+    codec, cfg = load_codec(args.codec, str(device))
     sr = cfg["sr"]
 
     print(f"生成 {args.frames} 帧 token (≈{args.frames * (2 ** cfg['n_down']) / sr:.2f}s)…")
-    codes = generate_tokens(lm, args.frames, device, args.temperature, args.top_k)
+    codes = generate_tokens(lm, args.frames, str(device), args.temperature, args.top_k)
     print(f"token 形状: {tuple(codes.shape)}")
 
     wav = codec.decode(codes)  # [1,1,L]
