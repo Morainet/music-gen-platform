@@ -1,23 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { PromptInput } from "@/components/PromptInput";
 import { ParamPanel } from "@/components/ParamPanel";
 import { GenerateButton } from "@/components/GenerateButton";
 import { TaskList } from "@/components/TaskList";
 import { useGenerate } from "@/hooks/useGenerate";
+import { useModels } from "@/hooks/useModels";
 import { useTaskProgress } from "@/hooks/useTaskProgress";
 import { useTasksStore } from "@/store/tasks";
 import type { GenerateParams } from "@/types/api";
 
 export function GeneratePage() {
   const [prompt, setPrompt] = useState("");
-  const [model, setModel] = useState("musicgen-medium");
+  const [model, setModel] = useState("");
   const [params, setParams] = useState<GenerateParams>({
     duration: 10,
     temperature: 1,
     cfg_coef: 3,
   });
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+
+  // 默认模型跟随后端返回的可用列表，避免选到已停用的模型
+  const { models } = useModels();
+  useEffect(() => {
+    if (models.length && !models.some((m) => m.name === model)) {
+      setModel(models[0].name);
+    }
+  }, [models, model]);
 
   const { generate, submitting } = useGenerate();
   const tasks = useTasksStore((s) => s.tasks);
